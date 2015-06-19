@@ -9,6 +9,18 @@
 <body class="c-<%= controller_name %> p-<%= action_name %>">
 <%= render partial:"layouts/navbar" %>
 <div class="container">
+<% flash.each do |name, msg| %>
+<% if name == 'alert' %>
+<div class="alert alert-dismissable alert-warning">
+<% elsif name == 'notice' %>
+<div class="alert alert-dismissable alert-success">
+<% else %>
+<div class="alert alert-dismissable alert-info">
+<% end %>
+  <button type="button" class="close" data-dismiss="alert">×</button>
+  <%= msg %>
+</div>
+<% end %>
 <%= yield %>
 </div>
 </body>

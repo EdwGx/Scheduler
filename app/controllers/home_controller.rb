@@ -25,7 +25,7 @@ class HomeController < ApplicationController
     uploaded_io = params[:xlsx_file]
     ext = file_extension(uploaded_io.original_filename)
     if ext != '.xlsx'
-      render plain: 'ERR'
+      alert = 'Invalid file format, xlsx file only'
       return
     end
     xlsx = Roo::Spreadsheet.open(uploaded_io.path)
@@ -53,8 +53,9 @@ class HomeController < ApplicationController
       end
       i += 1
     end
-
-    redirect_to root_path
+    notice = "Teams and fields have imported successfully"
+  ensure
+    redirect_to root_path, alert: alert, notice: notice
   end
 
   def test
