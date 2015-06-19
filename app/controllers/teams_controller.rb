@@ -77,13 +77,16 @@ class TeamsController < ApplicationController
 
   def email
     @team = Team.find_by!(:id => params[:team_id], :user_id => current_user.id)
+    @players = []
     if params[:players_type] == 'V'
       @players = @team.players.where(verified: true).pluck(:email).compact
     elsif params[:players_type] == 'U'
       @players = @team.players.where(verified: false).pluck(:email).compact
-    else
-      return
     end
+
+    return if @players.empty? || params[:subject].blank? || params[:content].blank?
+
+
 
     TeamMailer.send_mails_to(@players, params[:subject], params[:content]).deliver_later
   ensure
