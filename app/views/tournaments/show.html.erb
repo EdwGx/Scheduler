@@ -1,0 +1,284 @@
+<style>
+.date-container{
+    margin-top: 30px;
+    font-size: 21px;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    left:10%;
+    width:80%;
+    position:relative;
+    clear:both;
+    overflow: auto;
+}
+
+.date-container:first-child{
+  margin-top: 10px;
+}
+
+.date-container hr{
+    color:darkgrey;
+}
+
+.date-container{
+  padding: 35px 40px 50px 40px !important;
+}
+
+.field-container{
+
+    width: 100%;
+    position: relative;
+}
+
+.date-container .field-container{
+    overflow: auto;
+    margin-top: 40px;
+}
+
+.date-container .field-container:first-of-type{
+    margin-top: 10px;
+}
+
+.field-hr{
+    height: 2px;
+    width: 40%;
+}
+
+.bgcolor-1{
+    background-color: #1abc9c;
+}
+
+.bgcolor-2{
+    background-color: #2ecc71;
+}
+
+.bgcolor-3{
+    background-color: #3498db;
+}
+
+.bgcolor-4{
+    background-color: #9b59b6;
+}
+
+.bgcolor-5{
+    background-color: #e67e22;
+}
+
+.bgcolor-6{
+    background-color: #e74c3c;
+}
+
+.field-info{
+    font-size:18px;
+    width:30%;
+    line-height: 140%;
+    color: #999;
+    float: left;
+}
+
+.match-container{
+    width: 65%;
+    float: right;
+    position: relative;
+}
+
+
+.match-info{
+    position: relative;
+    margin-top: 10px;
+    padding: 10px 0px 10px 0px;
+    border-bottom: 1px solid darkgrey;
+    overflow: hidden;
+
+    height: 50px;
+    transition: height .2s ease-in;
+}
+
+.match-options{
+  display: none;
+  position:absolute;
+  top: 45px;
+  height: 30px;
+  line-height: 30px;
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity .2s ease-in;
+}
+
+.match-info.admin:hover{
+  height: 80px;
+}
+
+.match-info.admin:hover .match-options{
+  display: block;
+  opacity: 1.0;
+}
+
+.team-name{
+    pointer-events: none;
+    position: absolute;
+    width: 35%;
+    text-align: left;
+    height: 30px;
+    left: 0%;
+}
+
+.match-time{
+    pointer-events: none;
+    position: absolute;
+    left: 35%;
+    width: 30%;
+    float: left;
+    text-align: center;
+    font-size: 20px;
+    color: #777;
+    line-height: 30px;
+    height: 30px;
+
+}
+
+.team-name-alt{
+    left: 60%;
+    text-align: right;
+}
+
+@media all {
+  .print-only{
+    display: none;
+  }
+}
+
+@media print {
+    .date-container{
+      width: 100%;
+      left: 0%;
+    }
+
+    navbar, .print-hide{
+      display: none;
+    }
+
+    .match-info:hover{
+      height: 50px;
+    }
+
+    .match-info:hover .match-options{
+      display: none;
+    }
+
+    .print-only{
+      display: block;
+    }
+
+    .date-container .field-container{
+      margin-top: 30px;
+    }
+
+    .date-container .field-container:first-of-type{
+      margin-top: 10px;
+    }
+}
+
+
+
+</style>
+<script>
+var teams_data = <%= raw ActiveSupport::JSON.encode(@teams) %>;
+var show_all = true;
+function hashchange(hash){
+  if (hash.slice(0,6) == "#Team-") {
+    data = teams_data[hash.slice(6)];
+    $('#team-dropdown').html('<strong>'+data[0]+'</strong> only <span class="caret"></span>');
+    $('#team-only-name').text(data[0]);
+    $('.team-container, .match-info').css('display','none');
+    var t_class = '.team-' + data[1];
+    $(t_class).css('display','block');
+    $(t_class).parents('.team-container').css('display','block');
+    show_all = false;
+  } else if (!show_all){
+    show_all = true;
+    $('#team-dropdown').html('Show All');
+    $('.team-container, .match-info').css('display','block');
+  }
+}
+$(function(){
+  hashchange(location.hash);
+
+  $(window).bind('hashchange', function(){
+    hashchange(location.hash);
+  });
+});
+</script>
+<div class="row print-hide" style="width:100%;margin-bottom:40px;">
+  <% if @admin %>
+  <a class="btn btn-default" href="<%= new_tournament_match_path(params[:id]) %>">Add a match</a>
+
+  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#add-t-modal">Add a team</button>
+
+  <%= link_to 'Remove a team', edit_tournament_team_path(params[:id], 'remove'), class: 'btn btn-default' %>
+
+  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#email-modal">Send schedule to players</button>
+  <% end %>
+
+  <div class="dropdown col-xs-2" >
+    <button class="btn btn-default dropdown-toggle" style="width:100%" type="button" id="team-dropdown" data-toggle="dropdown" aria-expanded="true">
+      Show All
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="team-dropdown" style="width:100%">
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="">Show All</a></li>
+      <li role="presentation" class="divider"></li>
+      <% @teams.each do |key,value| %>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#Team-<%= key %>"><%= value[0] %></a></li>
+      <% end %>
+    </ul>
+  </div>
+
+  <a class="btn btn-default col-xs-2 col-sm-offset-1" href="<%= tournament_calendar_path(params[:id]) %>">Calendar Mode</a>
+</div>
+
+<div style="margin-bottom:60px;">
+<% colors = [1,2,3,4,5,6] %>
+<h2 class="print-only text-center"><%= @tournament.name %></h2>
+<h4 class="print-only text-center" id="team-only-name"></h4>
+<% @list.each_with_index do |date_container,index| %>
+<div class="well date-container team-container">
+  <% date = date_container[0][0].start_at %>
+  <%= date.strftime('%A, %B %e, %Y') %>
+  <% date_f = date.strftime('%F') %>
+  <% color = 0 %>
+  <% colors.shuffle! %>
+  <% date_container.each do |field_container| %>
+  <div class="field-container team-container">
+    <% color += 1 %>
+    <% color = 1 if color > 3 %>
+    <% field = field_container[0].field %>
+    <div class="field-hr bgcolor-<%= colors[color] %>"></div>
+    <div class="field-info">
+        <span style="color:black"><%= field.name %></span><br/>
+        <% if field.location.present? %>
+        <span style="color:black;font-size:15px"><%= field.location %></span>
+        <% end %>
+    </div>
+
+    <div class="match-container team-container">
+      <% field_container.each do |match| %>
+        <div class="match-info team-<%= match.home_team.id %> team-<%= match.away_team.id %><%= ' admin' if @admin %>" id="m-<%= match.id %>">
+            <div class="team-name"><%= match.home_team.name %></div>
+            <div class="match-time"><%= match.start_at.strftime("%I:%M %p") %></div>
+            <div class="team-name team-name-alt"><%= match.away_team.name %></div>
+            <% if @admin %>
+            <div class="match-options print-hide">
+              <%= link_to 'Edit', edit_tournament_match_path(params[:id], match) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to 'Delete', tournament_match_path(params[:id], match),
+            :data => {:confirm => 'Are you sure?'}, :method => :delete %>
+            </div>
+            <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+</div>
+<% end %>
+</div>
+
+<%= render partial: 'email_modal' %>
+<%= render partial: 'add_team_modal' %>

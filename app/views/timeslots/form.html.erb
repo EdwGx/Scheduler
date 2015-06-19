@@ -1,0 +1,46 @@
+<div style="text-align:center">
+<% url = @timeslot.persisted? ? field_timeslot_path(params[:field_id],params[:id]) : field_timeslots_path(params[:field_id]) %>
+<%= form_for [:field, @timeslot], url: url do |f| %>
+
+<%= errors_for @timeslot %>
+
+<div class="container">
+  <div class="row">
+    <div class='col-sm-6 col-sm-offset-3'>
+      <%= label_tag(:timeslot_start_at, "Start:") %>
+      <div class="form-group">
+        <div class='input-group date datetimepicker'>
+          <input type='text' class="form-control" name="timeslot[start_at]" id="timeslot_start" value="<%= @timeslot.start_at.strftime('%B %d, %Y %l:%M %p') unless @timeslot.start_at.nil? %>"/>
+          <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class='col-sm-6 col-sm-offset-3'>
+      <%= label_tag(:timeslot_end_at, "End:") %>
+      <div class="form-group">
+        <div class='input-group date datetimepicker'>
+          <input type='text' class="form-control" name="timeslot[end_at]" id="timeslot_end" value="<%= @timeslot.end_at.strftime('%B %d, %Y %l:%M %p') unless @timeslot.end_at.nil? %>"/>
+          <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= f.submit data: { disable_with: nil }%>
+<% end %>
+
+<script type="text/javascript">
+    $(function () {
+        $('.datetimepicker').datetimepicker({format:'MMMM DD, YYYY hh:mm A'});
+    });
+</script>
+</div>

@@ -1,0 +1,23 @@
+<div class="container-fluid">
+  <div class="row">
+  <button type="button" class="btn btn-primary col-xs-3" data-toggle="modal" data-target="#import-modal">
+    Import from spreadsheet
+  </button>
+  <div class="col-xs-1">
+  </div>
+  <button type="button" class="btn btn-primary col-xs-3" data-toggle="modal" data-target="#g-t-modal">
+    Generate tournament
+  </button>
+  </div>
+  <br/>
+  <div class="row">
+    <%= render partial: 'subtable', locals: {name: 'tournament', title: 'Tournaments', url: {new: new_tournament_path, path: tournament_path(1).gsub('/1','/')}, list: @tournaments } %>
+
+    <%= render partial: 'subtable', locals: {name: 'team', title: 'Teams', url: {new: new_team_path, path: team_path(1).gsub('/1','/')}, list: @teams } %>
+
+    <%= render partial: 'subtable', locals: {name: 'field', title: 'Fields', url: {new: new_field_path, path: field_path(1).gsub('/1','/')}, list: @fields } %>
+
+  </div>
+</div>
+<%= render partial: 'import_xlsx_modal' %>
+<%= render partial: 'generate_tournament_modal' %>

@@ -1,0 +1,477 @@
+<style>
+	.expt-table td{
+		padding: 10px;
+		text-align: center;
+	}
+
+	.expt-table, .expt-table tr, .expt-table td{
+		border: 1px solid black;
+	}
+
+	.time-block-table{
+		width:600px;
+		position: relative;
+	}
+	.time-block-table tr:not(:first-child) td:first-child{
+		width:40px;
+	}
+
+	.time-block-table tr:not(:first-child) td:last-child{
+		width:20px;
+		text-align: center;
+	}
+	.time-block-table tr{
+		height: 40px;
+	}
+	.time-block-table td{
+		padding: 4px 6px 4px 6px;
+		position: relative;
+	}
+	.time-block-table td:first-child{
+		text-align: right;
+		padding-right: 20px;
+	}
+	.time-block{
+		display: block;
+		transition: all 0.5s;
+		background-color: #27ae60;
+		position: absolute;
+		height: 32px;
+		top: 4px;
+		text-align: center;
+		line-height: 32px;
+		color: white;
+	}
+	.time-block:hover{
+		background-color: #2ecc71;
+	}
+	.time-block[data-text]:hover, .time-block[data-text][data-show="true"] {
+		z-index: 2;
+		min-width: 100px;
+	}
+
+	.time-block[data-text][data-show="true"] {
+		z-index: 1;
+	}
+	.time-block[data-text]:hover:after, .time-block[data-text][data-show="true"]:after {
+		content: attr(data-text);
+		text-align: center;
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		height: 32px;
+		line-height: 32px;
+		width: 100px;
+	}
+	#popover div div{
+		width: 180px;
+		display: none;
+	}
+	#popover[data-merge="true"] div div{
+		display: inline-block;
+	}
+	#popover{
+		display: none;
+		z-index: 2;
+		position: absolute;
+		color: white;
+	}
+	#popover-merge{
+		margin-bottom: -10px;
+	}
+	#popover[data-show="true"]{
+		display: block;
+	}
+	#popover div{
+		padding: 10px;
+		background-color: #3498db;
+		width: 200px;
+		text-align: center;
+	}
+	#popover div input{
+		color: black;
+		width: 30px;
+		text-align: center;
+	}
+	.popover-button{
+		margin: 10px 4px 0px 4px;
+		color:white;
+		background-color: transparent;
+		border: 2px solid white;
+		border-radius: 4px;
+		font-weight: bold;
+		font-size: 12px;
+	}
+	.popover-button:hover{
+		color: #3498db;
+		background-color: white;
+	}
+	#popover::before{
+		z-index: 3;
+		content: "";
+		display: block;
+		position: relative;
+		width: 0;
+		height: 0;
+		left: 90px;
+		border-style: solid;
+		border-width: 0 10px 10px 10px;
+		border-color: transparent transparent #3498db transparent;
+	}
+</style>
+<script>
+	var popover_block = null;
+	var popover_new = null;
+	var popover_type = 1;
+	var time_blocks = [];
+	function timeDifference(duration){
+		return (((duration[1][0]-duration[0][0])*60 + (duration[1][1]-duration[0][1]))/14.4);
+	}
+	function timePecentage(time){
+		return ((time[0]*60 + time[1])/14.4);
+	}
+	function isFullDay(duration){
+		return (duration[0][0] == 0 && duration[0][1] == 0 && duration[1][0] == 24 && duration[1][1] == 0);
+	}
+	function isTimeVaild(h,m){
+		return ((h < 24 && h >= 0 && m <= 60 && m >= 0) || (h == 24 && m == 00));
+	}
+	function isDurationVaild(sh,sm,eh,em){
+		if (!( isTimeVaild(sh,sm) && isTimeVaild(eh,em) )) {
+			return false;
+		}
+
+		if (sh < eh){
+			return true;
+		}else{
+			return (sh == eh && sm < em);
+		}
+	}
+	function strTime(time){
+		return time[0] + ':' + time[1];
+	}
+
+	function strTime_p(time){
+		if (time[1] < 10){
+			return time[0] + ':0' + time[1];
+		}
+		else{
+			return time[0] + ':' + time[1];
+		}
+	}
+
+	function strDuration(duration){
+		return strTime(duration[0]) + '-' + strTime(duration[1]);
+	}
+
+	function isMergeable(except_id,sh,sm,eh,em){
+		var i = except_id[0];
+		var j = except_id[1];
+		var day_arr = time_blocks[i];
+		var l = day_arr.length;
+		var t_s = null;
+		var t_e = null;
+		for (var m = 0; m < l; m++){
+			if (m != j) {
+				var block = day_arr[m];
+				if (t_s === null) {
+					if (sh >= block[0][0] && sm >= block[0][1]
+						&& eh <= block[1][0] && em <= block[1][1]){
+						t_s = block[0].slice();
+						t_e = block[1].slice();
+						return [t_s,t_e];
+					} else if ( eh >= block[0][0] && em >= block[0][1] ) {
+						if ( sh <= block[0][0] && sm <= block[0][1] ) {
+							t_s = [sh,sm];
+							if  (eh <= block[1][0] && em <= block[1][1]){
+								t_e = block[1].slice();
+								return [t_s,t_e];
+							}
+						} else {
+							t_s = block[0].slice();
+						}
+					}
+				} else if (t_e === null) {
+					if (eh >= block[0][0] && em >= block[0][1]){
+						if (eh <= block[1][0] && em <= block[1][1]) {
+							t_e = block[1].slice();
+							return [t_s,t_e];
+						}
+					}
+				}
+			}
+		}
+		if (t_s !== null) {
+			return [t_s,[eh,em]];
+		}
+		return false;
+	}
+
+	var timeBlockClick = function(){
+		var pos = $(this).offset();
+		pos.top += $(this).outerHeight() + 5;
+		pos.left += $(this).outerWidth()/2 - $('#popover').outerWidth()/2;
+		var info_data = $(this).attr('id').split('-');
+		var i = parseInt(info_data[1]);
+		var j = parseInt(info_data[2]);
+		var tinfo = time_blocks[i][j];
+		if (popover_block != null && popover_type == 1){
+			popover_block.attr('data-show','false');
+			popover_block = null;
+		}
+		$(this).attr('data-show','true');
+		$('#popover-s-h').val(tinfo[0][0]);
+		$('#popover-s-m').val(tinfo[0][1]);
+		$('#popover-e-h').val(tinfo[1][0]);
+		$('#popover-e-m').val(tinfo[1][1]);
+		popover_type = 1;
+		$('#popover-update').text('Update');
+		$('#popover').css('left',pos.left);
+		$('#popover').css('top',pos.top);
+		$('#popover').attr('data-show','true');
+		popover_block = $(this);
+	}
+
+	var createBlockClick = function(elem,id){
+		var pos = $(elem).offset();
+		pos.top += $(elem).outerHeight() + 5;
+		pos.left += $(elem).outerWidth()/2 - $('#popover').outerWidth()/2;
+
+		if (popover_block != null && popover_type == 1){
+			popover_block.attr('data-show','false');
+			popover_block = null;
+		}
+		$(elem).attr('data-show','true');
+		$('#popover-s-h').val('');
+		$('#popover-s-m').val('');
+		$('#popover-e-h').val('');
+		$('#popover-e-m').val('');
+		popover_type = 2;
+		$('#popover-update').text('Create');
+		$('#popover').css('left',pos.left);
+		$('#popover').css('top',pos.top);
+		$('#popover').attr('data-show','true');
+		popover_block = id;
+	}
+
+	function generateRow(time_block_t,i,row,cell){
+		l = row.length;
+		for (var j = 0; j < l; j++){
+			var tinfo = row[j];
+			//tinfo [h start,m start],[h end,m start]
+			var time_block = time_block_t.clone();
+			time_block.attr('id','t-'+String(i)+'-'+String(j));
+
+			var content;
+			if (isFullDay(tinfo)){
+				content = "Full Day";
+			} else {
+				content = strTime_p(tinfo[0]) + ' - ' + strTime_p(tinfo[1]);
+			}
+			time_block.css('width',timeDifference(tinfo).toFixed(2)+'%');
+			time_block.css('left',timePecentage(tinfo[0]).toFixed(2)+'%');
+			cell.append(time_block);
+
+			if (time_block.innerWidth() < 100){
+				time_block.attr('data-text',content);
+			}else{
+				time_block.text(content);
+			}
+			time_block.click(timeBlockClick);
+		}
+	}
+
+	function saveSchedule(elem){
+		$(elem).attr("disabled", true);
+		$('#schedule-form #schedule').val(JSON.stringify(time_blocks));
+		$('#schedule-form').submit();
+	}
+
+
+
+	$(document).ready(function(){
+		time_blocks = JSON.parse($('#popover-info').text());
+		var time_block_t = $('<div>',{class: 'time-block'});
+		for (var i = 0; i < 7; i ++) {
+			var cell = $('#d-'+String(i));
+			generateRow(time_block_t,i,time_blocks[i],cell);
+		}
+
+		$('#popover-cancel').click(function(){
+			if  (popover_type == 1) {
+				popover_block.attr('data-show','false');
+			}
+			popover_block = null;
+			$('#popover').attr('data-show','false');
+		});
+		$('#popover-update').click(function(){
+			if (popover_new !== null){
+				var time_block_t = $('<div>',{class: 'time-block'});
+				var i;
+				var j;
+				if (popover_type == 1) {
+					var info_data = popover_block.attr('id').split('-');
+					i = parseInt(info_data[1]);
+					j = parseInt(info_data[2]);
+				} else {
+					i = popover_block;
+					j = -1;
+				}
+				popover_block = null;
+
+				if (popover_new === false){
+					var sh = parseInt($('#popover-s-h').val());
+					var sm = parseInt($('#popover-s-m').val());
+
+					var eh = parseInt($('#popover-e-h').val());
+					var em = parseInt($('#popover-e-m').val());
+
+					popover_new = [[sh,sm],[eh,em]];
+				}
+
+				var cell = $('#d-'+String(i));
+				cell.empty();
+
+				var row_f = Array();
+				var row_b = Array();
+
+				var l = time_blocks[i].length;
+				for(var k = 0; k < l; k++){
+					if (k != j){
+						var block = time_blocks[i][k];
+						if (block[0][0] >= popover_new[1][0] && block[0][1] >= popover_new[1][1]){
+							row_b.push(block);
+						} else if (block[1][0] <= popover_new[0][0] && block[1][1] <= popover_new[0][1]){
+							row_f.push(block);
+						}
+					}
+				}
+				row_f.push(popover_new);
+				time_blocks[i] = row_f.concat(row_b);
+				generateRow(time_block_t,i,time_blocks[i],cell);
+
+				popover_block = null;
+				$('#popover').attr('data-show','false');
+			}
+		});
+		$('#popover input').bind("change paste keyup", function() {
+			var flag = false;
+
+			var sh = parseInt($('#popover-s-h').val());
+			var sm = parseInt($('#popover-s-m').val());
+
+			var eh = parseInt($('#popover-e-h').val());
+			var em = parseInt($('#popover-e-m').val());
+			popover_new = null;
+			if (isDurationVaild(sh,sm,eh,em)){
+				var i;
+				var j;
+				if (popover_type == 1) {
+					var info_data = popover_block.attr('id').split('-');
+					i = parseInt(info_data[1]);
+					j = parseInt(info_data[2]);
+				} else {
+					i = popover_block;
+					j = -1;
+				}
+				var feedback = isMergeable([i,j],sh,sm,eh,em);
+				popover_new = feedback;
+				if (feedback !== false){
+					flag = true;
+					$('#popover-m-s').text(strTime_p(feedback[0]));
+					$('#popover-m-e').text(strTime_p(feedback[1]));
+					$('#popover-merge').css('display','block');
+					$('#popover-update').text('Merge');
+				}
+			}
+
+			if (!flag){
+				$('#popover-merge').css('display','none');
+				if (popover_type == 1){
+					$('#popover-update').text('Update');
+				} else {
+					$('#popover-update').text('Create');
+				}
+			}
+		});
+	});
+
+
+</script>
+<div id="popover-info" style="display:none"><%= @schedule %></div>
+<div id="popover" data-show="false" data-merge="true"><div><input type="text" id="popover-s-h" value="" /> : <input type="text" id="popover-s-m"/> - <input type="text" id="popover-e-h"/> : <input type="text" id="popover-e-m"/>
+	<div id="popover-merge" style="display:none">Merge becomes <span id="popover-m-s"></span> - <span id="popover-m-e"></span></div>
+	<button id="popover-update" class="popover-button">Update</button><button id="popover-cancel" class="popover-button">Cancel</button></div></div>
+<h2 style="width:100%; text-align:center"><%= @field.name %></h2>
+<p style="width:100%; text-align:center"><%= @field.location %></p>
+<hr/>
+<table class="centerX time-block-table">
+<tr class="time-row">
+	<td></td>
+	<td style="text-align:left">0:00</td>
+	<td style="text-align:center">12:00</td>
+	<td style="text-align:right">24:00</td>
+	<td></td>
+</tr>
+<tr>
+	<td>Sunday</td>
+	<td colspan="3" id="d-0"></td>
+	<td><button onclick="createBlockClick(this,0)">+</button></td>
+</tr>
+<tr>
+	<td>Monday</td>
+	<td colspan="3" id="d-1"></td>
+	<td><button onclick="createBlockClick(this,1)">+</button></td>
+</tr>
+<tr>
+	<td>Tuesday</td>
+	<td colspan="3" id="d-2"></td>
+	<td><button onclick="createBlockClick(this,2)">+</button></td>
+</tr>
+<tr>
+	<td>Wednesday</td>
+	<td colspan="3" id="d-3"></td>
+	<td><button onclick="createBlockClick(this,3)">+</button></td>
+</tr>
+<tr>
+	<td>Thursday</td>
+	<td colspan="3" id="d-4"></td>
+	<td><button onclick="createBlockClick(this,4)">+</button></td>
+</tr>
+<tr>
+	<td>Friday</td>
+	<td colspan="3" id="d-5"></td>
+	<td><button onclick="createBlockClick(this,5)">+</button></td>
+</tr>
+<tr>
+	<td>Saturday</td>
+	<td colspan="3" id="d-6"></td>
+	<td><button onclick="createBlockClick(this,6)">+</button></td>
+</tr>
+</table>
+<br/><br/><br/>
+<table class="expt-table centerX">
+<% if @timeslots.length == 0 %>
+<tr><td colspan="4">Nothing yet</td></tr>
+<% else %>
+<% @timeslots.each do |ts| %>
+<tr>
+	<td><%= ts[1] %></td>
+	<td><%= ts[0] %></td>
+	<td><%= ts[2] %></td>
+	<td><%= link_to 'Delete', field_timeslot_path(params[:id],ts[3]), method: :delete%></td>
+</tr>
+<% end %>
+<% end %>
+<tr>
+	<td colspan="4"><%= link_to 'Add Time Exception', new_field_timeslot_path(params[:id]) %></td>
+</tr>
+</table>
+<%= form_tag(field_schedule_path(params[:id]), method: "put", style:"display:none", id:"schedule-form") do %>
+	<%= hidden_field_tag(:schedule) %>
+<% end %>
+<div style="text-align:center;margin-top:40px;">
+<button type="button" class="btn btn-default" onclick="saveSchedule(this)">Save</button>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button type="button" class="btn btn-default" onclick="window.location.href = '/';">Cancel</button>
+</div>

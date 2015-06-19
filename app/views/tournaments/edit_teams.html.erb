@@ -1,0 +1,21 @@
+<div class="centerY well container-fluid">
+  <%= form_tag class: 'form-horizontal' do %>
+  <fieldset>
+  <legend><%= @add_team ? 'Add a team to the tournament' : 'Remove a team from the tournament'  %></legend>
+  <div>
+
+  <table class="table center-block" style="width:200px">
+  <% @options.each do |id, name| %>
+  <tr>
+    <td><input type="radio" name="team" id="team_<%= id %>" value="<%= id %>"/></td>
+    <td><label for="team_<%= id %>"><%= name %></label></td>
+  </tr>
+  <% end %>
+  </table>
+
+  <%= link_to 'Cancel', tournament_path(params[:tournament_id]), class: 'btn'  %>
+  <%= submit_tag @add_team ? 'Add' : 'Remove', class: 'btn btn-primary' %>
+  </div>
+  </fieldset>
+  <% end %>
+</div>

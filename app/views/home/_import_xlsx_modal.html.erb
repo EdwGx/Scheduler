@@ -1,0 +1,19 @@
+<div class="modal fade" id="import-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Import teams and fields</h4>
+      </div>
+      <div class="modal-body">
+        <%= form_tag('/import', method: :POST, id:"import-form", multipart: true) do %>
+        	<%= file_field_tag(:xlsx_file) %>
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submit-import-form" onclick="document.getElementById('import-form').submit();">Import</button>
+      </div>
+    </div>
+  </div>
+</div>

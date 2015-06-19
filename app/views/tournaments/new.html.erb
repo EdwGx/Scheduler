@@ -1,0 +1,15 @@
+<div class="centerY well">
+  <%= form_for @tournament, html: {class: 'form-horizonta'} do |f| %>
+  <fieldset>
+  <legend>Create Tournament</legend>
+	<%= errors_for @tournament %>
+
+  <div class="form-group">
+    <%= f.label :name, class: 'control-label' %>
+    <%= f.text_field :name, placeholder: 'Name', class: 'form-control' %>
+  </div>
+
+  <%= f.submit 'Create', class: 'btn btn-primary', data: { disable_with: "Please wait..." }%>
+  </fieldset>
+  <% end %>
+</div>

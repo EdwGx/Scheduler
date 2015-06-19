@@ -1,0 +1,30 @@
+<div class="center-block text-center">
+<h2><%= @field.name %></h2>
+<h4><%= @field.location %></h4>
+<%= link_to 'Edit', edit_field_path(params[:id]), class: 'btn btn-default' %>
+</div>
+<br/>
+
+<table class="table centerX">
+<tr><th>Start</th><th>End</th><th>Status</th><th colspan="2">Options</th></tr>
+<% if @timeslots.length == 0 %>
+<tr><td colspan="5">Nothing yet</td></tr>
+<% else %>
+<% @timeslots.each do |ts| %>
+<tr>
+	<td><%= ts[0] %></td>
+	<td><%= ts[1] %></td>
+	<% if ts[2].nil? %>
+	<td><%= green_tag('Available') %></td>
+	<% else %>
+	<td><%= yellow_tag('Occupy') %></span></td>
+	<% end %>
+	<td><%= link_to 'Edit', edit_field_timeslot_path(params[:id],ts[3]) %></td>
+	<td><%= link_to 'Delete', field_timeslot_path(params[:id],ts[3]), method: :delete %></td>
+</tr>
+<% end %>
+<% end %>
+<tr>
+	<td class="text-center" colspan="5"><%= link_to 'Add Timeslot', new_field_timeslot_path(params[:id]), class: 'btn btn-default' %></td>
+</tr>
+</table>

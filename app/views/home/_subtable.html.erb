@@ -1,0 +1,27 @@
+<div class="col-sm-4 col-xs-12 table_grid">
+<div class="well">
+<table class="centerX table" id="<%= name %>-table">
+<thead>
+<tr><th><%= title %></th><th class="cell-option"><%= link_to raw('<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>'), url[:new] %></th></tr>
+</thead>
+<tbody>
+<% if list.empty? %>
+<tr><td class="text-center">Nothing yet</td><td></td></tr>
+<% else %>
+<% list.each do |info| %>
+<tr id="<%= name %>-box-<%= info[0] %>"><td><%= link_to info[1],(url[:path] + info[0].to_s) %><%= raw(' <span style="color:grey">- ' + info[2] +'</span>') unless info[2].nil?  %></td><td class="cell-option"><%= link_to raw('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'), (url[:path] + info[0].to_s), data: {confirm: "Are you sure deleting #{info[1]} #{name}?" , disable_with: "" }, remote: true, method: :delete %></td></tr>
+<% end %>
+<% end %>
+</tbody>
+</table>
+
+<script>
+$(window).on('<%= name %>:remove',function(){
+  console.log($('#<%= name %>-table tr').length);
+  if ($('#<%= name %>-table tr').length <= 1){
+    $('#<%= name %>-table').append('<tr><td style="text-align:center;">Nothing yet</td><td></td></tr>');
+  }
+});
+</script>
+</div>
+</div>

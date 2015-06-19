@@ -1,0 +1,160 @@
+<%= form_tag team_reg_toggle_path(params[:id]), id: :reg_toggle_form , method: :post, remote: true do %>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Current Players</h3>
+  </div>
+  <div class="panel-body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>E-mail</th>
+        <% @team.players_info.each do |info| %>
+        <th><%= info[0] %></th>
+        <% end %>
+        <th colspan="2">Options</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% if @players.any? %>
+      <% @players.each do |player| %>
+      <tr>
+        <td><%= player.name %></td>
+        <td><%= player.email %></td>
+        <% @team.players_info.each_with_index do |info, index| %>
+        <% if info[1] == 0 %>
+        <td><%= player.info[index] %></td>
+        <% else %>
+        <td><%=  Date.iso8601(player.info[index]).strftime('%B %e, %Y') unless player.info[index].nil? %></td>
+        <% end %>
+        <% end %>
+        <td><%= link_to 'Edit', edit_team_player_path(params[:id],player.id) %></td>
+        <td><%= link_to 'Delete', team_player_path(params[:id],player.id), method: :delete %></td>
+      </tr>
+      <% end %>
+      <% else %>
+      <tr><td colspan="<%= 4 + @team.players_info.count %>">Nothing yet</td></tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div class="text-center">
+    <%= link_to 'Add Player', new_team_player_path(params[:id]), class: 'btn btn-default' %>
+    <button type="button" class="btn" data-toggle="modal" data-target="#email-modal" data-players="V">Send email to players</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Unverified Players</h3>
+  </div>
+  <div class="panel-body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>E-mail</th>
+        <% @team.players_info.each do |info| %>
+        <th><%= info[0] %></th>
+        <% end %>
+        <th colspan="3">Options</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% if @unverified_players.any? %>
+      <% @unverified_players.each do |player| %>
+      <tr>
+        <td><%= player.name %></td>
+        <td><%= player.email %></td>
+        <% @team.players_info.each_with_index do |info, index| %>
+        <% if info[1] == 0 %>
+        <td><%= player.info[index] %></td>
+        <% else %>
+        <td><%=  Date.iso8601(player.info[index]).strftime('%B %e, %Y') unless player.info[index].nil? %></td>
+        <% end %>
+        <% end %>
+        <td><%= link_to 'Verify', team_player_verify_path(params[:id],player.id), method: :POST %></td>
+        <td><%= link_to 'Edit', edit_team_player_path(params[:id],player.id) %></td>
+        <td><%= link_to 'Delete', team_player_path(params[:id],player.id), method: :delete %></td>
+      </tr>
+      <% end %>
+      <% else %>
+      <tr><td colspan="<%= 5 + @team.players_info.count %>">Nothing yet</td></tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div class="text-center">
+    <button type="button" class="btn" data-toggle="modal" data-target="#email-modal" data-players="U">Send email to unverified players</button>
+    </div>
+  </div>
+</div>
+
+<br/>
+<div class="togglebutton">
+  <label>
+    <%= check_box_tag :reg, '1', @team.allow_registration, id: 'reg_checkbox' %>
+    Online Registration <%= @team.allow_registration ? green_tag('open', id: 'reg_status', style: 'width:100px !important;') : yellow_tag('closed', id: 'reg_status') %>
+    &nbsp;&nbsp;&nbsp;
+    <% url_reg = register_url(@team.registration_token) %>
+    <%= link_to url_reg, url_reg %>
+  </label>
+</div>
+<% end %>
+<script>
+$('#reg_checkbox').change(function(){
+  $('#reg_toggle_form').submit();
+  $(this).attr('disabled','disabled');
+  if ($(this).checked) {
+    $('#reg_status').attr('class','green-tag');
+    $('#reg_status').text('open');
+  } else {
+    $('#reg_status').attr('class','yellow-tag');
+    $('#reg_status').text('closed');
+  }
+});
+</script>
+<br/>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Online Registration Form</h3>
+  </div>
+  <div class="panel-body">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th colspan="2">Options</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td> Name </td>
+        <td> Text </td>
+        <td colspan="2"></td>
+      </tr>
+      <tr>
+        <td> E-mail </td>
+        <td> Text </td>
+        <td colspan="2"></td>
+      </tr>
+      <% type_list = ['Text', 'Date'] %>
+      <% @team.players_info.each_with_index do |info,index| %>
+      <tr>
+        <% index += 1 %>
+        <td><%= info[0] %></td>
+        <td><%= type_list[info[1]] %></td>
+        <td><%= link_to 'Update', team_edit_form_path(params[:id], index) %></td>
+        <td><%= link_to 'Delete', team_edit_form_path(params[:id], index), method: :delete %></td>
+      </tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div class="text-center">
+      <%= link_to 'Add Field', team_add_form_path(params[:id]), class: 'btn' %>
+    </div>
+  </div>
+</div>
+
+<%= render partial: 'email_players_modal' %>

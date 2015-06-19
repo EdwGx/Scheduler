@@ -1,0 +1,106 @@
+<div class="modal fade" id="g-t-modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Generate Tournament</h4>
+      </div>
+      <div class="modal-body">
+        <%= form_tag tournaments_generate_path, method: :POST, remote: true, id: 'g-t-form', class: 'form-horizontal' do %>
+        <fieldset>
+        <p id="gt-modal-notice" class="alert alert-danger" role="alert" style="display:none">
+        </p>
+
+        <div class="form-group">
+            <label for="tournament_name" class="col-lg-3 control-label">Name</label>
+            <div class="col-lg-9">
+                <input type="text" class="form-control" name="name" id="tournament_name" placeholder="Name">
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tournament_start" class="col-lg-3 control-label">Start</label>
+          <div class="input-group date datetimepicker col-lg-8">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+            <input type="text" class="form-control" name="start" id="tournament_start" value=""/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tournament_end" class="col-lg-3 control-label">End</label>
+          <div class="input-group date datetimepicker col-lg-8">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+            <input type="text" class="form-control" name="end" id="tournament_end" value=""/>
+          </div>
+        </div>
+
+        <script type="text/javascript">
+            $(function () {
+                $('.datetimepicker').datetimepicker({format:'MMMM DD, YYYY hh:mm A'});
+            });
+        </script>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Choose Teams</label>
+          <div class="col-lg-9">
+          <% @teams.each do |team| %>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="teams[<%= team[0] %>}]">  <%= team[1] %>
+            </label>
+          </div>
+          <% end %>
+          </div>
+        </div>
+        <br/>
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Choose Fields</label>
+          <div class="col-lg-9">
+          <% @fields.each do |field| %>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="fields[<%= field[0] %>]">  <%= field[1] %>
+            </label>
+          </div>
+          <% end %>
+          </div>
+        </div>
+        </fieldset>
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submit-g-t-form">Generate</button>
+        <script>
+        $(function(){
+          $('#submit-g-t-form').click(function(){
+            $("#g-t-form").submit();
+            $('#submit-g-t-form').attr('disabled','disabled');
+          });
+
+          $('#g-t-form input').bind('keypress', function(e) {
+          	if(e.keyCode==13){
+              $('#submit-g-t-form').click();
+          	}
+          });
+
+          $('#g-t-form').bind('ajax:success', function(evt, data, status, xhr){
+            text = xhr.responseText;
+            if (text.slice(0,2) == "OK") {
+              window.location.href = "/tournaments/" + text.slice(2);
+            } else {
+              $('#gt-modal-notice').text(text);
+              $('#gt-modal-notice').css('display','block');
+              $('#submit-g-t-form').removeAttr('disabled');
+            }
+          });
+        });
+        </script>
+      </div>
+    </div>
+  </div>
+</div>

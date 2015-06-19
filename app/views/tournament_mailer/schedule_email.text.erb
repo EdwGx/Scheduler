@@ -1,0 +1,11 @@
+<%= @tournament.name %> (<%= @note %>)
+
+<% @schedule.each do |date, day_sch| %>
+<%= date %>
+<% day_sch.each do |m| %>
+ - <%= m %>
+<% end %>
+
+<% end %>
+
+<%= url_for(@tournament) %>

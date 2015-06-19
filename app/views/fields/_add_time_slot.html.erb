@@ -1,0 +1,27 @@
+<div class="modal fade" id="timeslot-modal" tabindex="-1" role="dialog" aria-labelledby="timeslot-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Import teams and fields</h4>
+      </div>
+      <div class="modal-body">
+        <%= form_tag('/import', method: "post", id:"import-form") do %>
+        	<%= file_field_tag(:xlsx_file) %>
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submit-import-form">Add</button>
+        <script>
+        $(function(){
+          $('#submit-import-form').click(function(){
+            document.getElementById("import-form").submit();
+            console.log('submit');
+          });
+        });
+        </script>
+      </div>
+    </div>
+  </div>
+</div>

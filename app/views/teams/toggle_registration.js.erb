@@ -1,0 +1,8 @@
+$('#reg_checkbox').removeAttr('disabled');
+<% if @team.allow_registration %>
+$('#reg_status').text('open');
+$('#reg_status').attr('class','green-tag');
+<% else %>
+$('#reg_status').text('closed');
+$('#reg_status').attr('class','yellow-tag');
+<% end %>

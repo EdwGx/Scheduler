@@ -1,0 +1,208 @@
+<style>
+  .calendar-table {
+    width: 98%;
+    position: relative;
+    left: 1%;
+  }
+  .calendar-table, .calendar-table tr, .calendar-table td, .calendar-table th {
+    border: 1px solid #d8d8d8;
+    border-collapse: collapse;
+  }
+  .calendar-table th {
+    width: 14%;
+    height: 40px;
+    padding-right: 10px;
+    background-color: #f3f3f3;
+    font-weight: bold;
+    text-align: right;
+  }
+  .calendar-table td {
+    height: 90px;
+    vertical-align: top;
+    padding: 5px;
+  }
+
+  .calendar-div{
+    width: 90%;
+    left: 5%;
+    position: relative;
+  }
+  .calendar-date{
+    display: inline-block;
+  }
+  .prev-month, .next-month{
+    background-color: #f9f9f9;
+  }
+  .calendar-date{
+    float: right;
+    clear: both;
+    text-align: right;
+  }
+  .today .calendar-date{
+    color: red;
+  }
+
+  .calendar-event{
+    float:left;
+    background-color: dodgerblue;
+    color:white;
+    border-radius: 4px;
+    padding:2px;
+    margin-top: 5px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .calendar-event span{
+    color: gold;
+  }
+
+  .calendar-header {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-left: 20px;
+  }
+  .calendar-header span {
+    margin: 0px 20px 0px 20px;
+  }
+  .calendar-header a {
+    font-weight: bold;
+  }
+
+</style>
+<script>
+
+var teams_data = <%= raw ActiveSupport::JSON.encode(@teams) %>;
+var show_all = true;
+
+<% if @admin %>
+var changed_cal_events = [];
+var saving_changes = false;
+function save(element){
+  $(element).text('Updating...')
+  $(element).attr('disabled','disabled');
+  saving_changes = true;
+  var list = {};
+  for (var i in changed_cal_events) {
+    ev = changed_cal_events[i];
+    list[ev.slice(3)] = $(ev).parent().children('.calendar-date').first().data('date');
+  }
+  $('#update-form #changed_events').val(JSON.stringify(list));
+  $('#update-form').submit();
+}
+
+function drag(event){
+  if (saving_changes) {
+    event.preventDefault();
+  } else {
+    event.dataTransfer.setData("id", event.target.id);
+  }
+}
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip();
+
+  $('.day').on("dragover", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+
+  $('.day').on("dragleave", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+
+  $('.day').on('drop', function(event){
+    event.preventDefault();
+    event.stopPropagation();
+
+    ce_name = '#'+ event.originalEvent.dataTransfer.getData("id");
+    if (changed_cal_events.indexOf(ce_name) == -1) {
+      changed_cal_events.push(ce_name);
+    }
+    cal_event = $(ce_name).detach();
+    flag = false;
+
+    $(this).children('.calendar-event').each(function(){
+      if ($(this).data('time') > cal_event.data('time')){
+        cal_event.insertBefore(this);
+        flag = true;
+        return false;
+      }
+    });
+
+    if (!flag) {
+      $(this).append(cal_event);
+    }
+  });
+
+  $('#update-form').bind('ajax:success', function(evt, data, status, xhr){
+    text = xhr.responseText;
+    if (text == "ERROR") {
+      location.reload();
+    } else {
+      changed_cal_events = [];
+      $('#save-button').text('Save');
+      $('#save-button').removeAttr('disabled');
+      saving_changes = false;
+    }
+  });
+});
+  <% end %>
+
+  function hashchange(hash){
+    if (hash.slice(0,6) == "#Team-") {
+      data = teams_data[hash.slice(6)];
+      $('#team-dropdown').html('<strong>'+data[0]+'</strong> only <span class="caret"></span>')
+      $('.calendar-event').css('display','none');
+      $('.team-' + data[1]).css('display','block');
+      show_all = false;
+    } else if (!show_all){
+      show_all = true;
+      $('#team-dropdown').html('Show All')
+      $('.calendar-event').css('display','block');
+    }
+  }
+$(function(){
+  hashchange(location.hash);
+});
+
+$(window).bind('hashchange', function(){
+  hashchange(location.hash);
+
+});
+
+</script>
+<%= form_tag nil, method: :POST, remote: true, style:"display:none", id: "update-form" do %>
+<%= hidden_field_tag :changed_events %>
+<% end %>
+<div class="calendar-div">
+<% if @admin %>
+<button class="btn btn-primary" style="float:right;right:20px;position:relative;" onclick="save(this)" id="save-button">Save</button>
+<% end %>
+<%= link_to 'List Mode', tournament_path(params[:tournament_id]), class: 'btn btn-default', style:'float:right;right:30px;position:relative;' %>
+
+<div class="dropdown" style="float:right;right:40px;position:relative;" >
+  <button class="btn btn-default dropdown-toggle" type="button" id="team-dropdown" data-toggle="dropdown" aria-expanded="true">
+    Show All
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="team-dropdown">
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Show All</a></li>
+    <li role="presentation" class="divider"></li>
+    <% @teams.each do |key,value| %>
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="#Team-<%= key %>"><%= value[0] %></a></li>
+    <% end %>
+  </ul>
+</div>
+
+<%= month_calendar table: {class: "calendar-table"}, start_date: @start_date do |date| %>
+<div class="calendar-date" data-date="<%= date %>"><%= date.day %></div>
+<% unless @matches[date].nil? %>
+<% @matches[date].each do |match| %>
+<div class="calendar-event team-<%= match[5] %> team-<%= match[6] %>" data-toggle="tooltip" data-placement="top" title="<%= match[2] %>" <%= raw('draggable="true" ondragstart="drag(event)"') if  @admin %> id="m-<%= match[0] %>" data-time="<%= match[1] %>"><%= match[1] %> <span>|</span> <%= match[3] %> <span>vs</span> <%= match[4] %></div>
+<% end %>
+<% end %>
+<% end %>
+</div>

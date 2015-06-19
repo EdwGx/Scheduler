@@ -1,0 +1,141 @@
+<style>
+.scoll-table-container{
+  border: 1px solid #D2D2D2;
+  width: 98%;
+  margin-bottom: 30px;
+}
+.scoll-table-title{
+  background-color: #FAFAFA;
+  border-bottom: 1px solid #D2D2D2;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px 0px 10px 0px;
+}
+
+.scoll-table{
+  text-align: left;
+  width: 100%;
+}
+
+.scoll-table-wrapper{
+  max-height:195px;
+  overflow: scroll;
+}
+
+.scoll-table tr td{
+  border-bottom: 1px solid #D2D2D2;
+  padding: 5px 2px 5px 10px;
+  width:100%;
+  overflow: hidden;
+  vertical-align: middle;
+  background-color: white;
+}
+
+.scoll-table tr td input{
+  margin-right: 5px;
+}
+
+.scoll-table tr:last-child td{
+  border-bottom: none;
+}
+
+</style>
+<% url = @match.persisted? ? tournament_match_path(params[:tournament_id],params[:id]) : tournament_matches_path(params[:tournament_id]) %>
+<%= form_for(@match, url: url) do |f|%>
+  <%= errors_for @match %>
+
+  <% teams = current_user.teams.all.order(name: :ASC).pluck(:id,:name) %>
+  <div class="container-fluid">
+  <div class="row">
+
+  <div class="col-xs-12 col-sm-6 col-md-4">
+  <div class="scoll-table-container center-block">
+    <div class="scoll-table-title">Home Team</div>
+    <div class="scoll-table-wrapper">
+    <table class="scoll-table">
+      <% m_home = @match.home_team %>
+      <% m_home = m_home.id unless m_home.nil? %>
+      <% teams.each do |team| %>
+      <tr><td>
+      <%= radio_button_tag('match[home_team]', team[0], team[0] == m_home) %>
+      <%= label_tag("match_home_team_#{team[0]}", team[1]) %>
+      </tr></td>
+      <% end %>
+    </table>
+    </div>
+  </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 col-md-4">
+  <div class="scoll-table-container center-block">
+    <div class="scoll-table-title">Away Team</div>
+    <div class="scoll-table-wrapper">
+    <table class="scoll-table">
+      <% m_away = @match.away_team %>
+      <% m_away = m_away.id unless m_away.nil? %>
+      <% teams.each do |team| %>
+      <tr><td>
+      <%= radio_button_tag('match[away_team]', team[0], team[0] == m_away) %>
+      <%= label_tag("match_away_team_#{team[0]}", team[1]) %>
+      </tr></td>
+      <% end %>
+    </table>
+  </div>
+  </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-0">
+  <div class="scoll-table-container center-block">
+    <div class="scoll-table-title">Field</div>
+    <div class="scoll-table-wrapper">
+    <table class="scoll-table">
+      <% field_id = @match.field_id %>
+      <% current_user.fields.all.pluck(:id,:name).each do |field| %>
+      <tr><td>
+      <%= radio_button_tag('match[field_id]', field[0], field_id == field[0] ) %>
+      <%= label_tag("match_field_id_#{field[0]}", field[1]) %>
+      </tr></td>
+      <% end %>
+    </table>
+    </div>
+  </div>
+  </div>
+
+  </div>
+  </div>
+  <br/>
+  <div style="text-align:center">
+  <p>
+  <%= f.label :start_at, 'Time:' %>
+  <div class="container">
+    <div class="row">
+        <div class='col-sm-6 col-sm-offset-3'>
+            <div class="form-group">
+                <div class='input-group date' id='datetimepicker1'>
+                    <input type='text' class="form-control" name="match[start_at]" id="match_start_at"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker({format:'MMMM DD, YYYY hh:mm A',defaultDate:'<%= @match.start_at.nil? ? Time.zone.now.strftime('%B %d, %Y %l:%M %p') : @match.start_at.strftime('%B %d, %Y %l:%M %p') %>'});
+            });
+        </script>
+    </div>
+  </div>
+  </p>
+  <br/>
+  <p>
+  <%= f.label :duration, 'Duration:' %>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <%= f.text_field :duration %>&nbsp;minutes
+  </p>
+  <br/>
+  <br/>
+  <%= f.submit class:["btn","btn-primary"] %>
+  </div>
+<% end %>

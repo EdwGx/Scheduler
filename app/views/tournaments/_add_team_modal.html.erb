@@ -1,0 +1,101 @@
+<div class="modal fade" id="add-t-modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Add a team</h4>
+      </div>
+      <div class="modal-body">
+        <%= form_tag edit_tournament_team_path(params[:id], 'add'), method: :POST, remote: true, id: 'add-t-form', class: 'form-horizontal' do %>
+        <p id="add-t-modal-notice" class="alert alert-danger" role="alert" style="display:none">
+        </p>
+
+        <fieldset>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Team</label>
+          <div class="col-lg-9">
+            <% @unused_teams.each do |team| %>
+            <div class="radio radio-primary">
+                <label>
+                    <%= radio_button_tag 'team', team.id %> <%= team.name %>
+                </label>
+            </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tournament_start" class="col-lg-3 control-label">Start</label>
+          <div class="input-group date datetimepicker col-lg-8">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+            <input type="text" class="form-control" name="start" id="tournament_start" value=""/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tournament_end" class="col-lg-3 control-label">End</label>
+          <div class="input-group date datetimepicker col-lg-8">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+            <input type="text" class="form-control" name="end" id="tournament_end" value=""/>
+          </div>
+        </div>
+
+        <script type="text/javascript">
+            $(function () {
+                $('.datetimepicker').datetimepicker({format:'MMMM DD, YYYY hh:mm A'});
+            });
+        </script>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Fields</label>
+          <div class="col-lg-9">
+          <% @fields.each do |field| %>
+          <div class="checkbox">
+            <label>
+              <%= check_box_tag "fields[#{ field[0] }]", '1', field[2] %>
+              <%= field[1] %>
+            </label>
+          </div>
+          <% end %>
+          </div>
+        </div>
+        </fieldset>
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submit-add-t-form">Add</button>
+        <script>
+        $(function(){
+          $('#submit-add-t-form').click(function(){
+            $("#add-t-form").submit();
+            $('#submit-add-t-form').attr('disabled','disabled');
+          });
+
+          $('#add-t-form input').bind('keypress', function(e) {
+          	if(e.keyCode==13){
+              $('#submit-add-t-form').click();
+          	}
+          });
+
+          $('#add-t-form').bind('ajax:success', function(evt, data, status, xhr){
+            text = xhr.responseText;
+            if (text.slice(0,2) == "OK") {
+              window.location.href = "/tournaments/" + text.slice(2);
+            } else {
+              $('#add-t-modal-notice').text(text);
+              $('#add-t-modal-notice').css('display','block');
+              $('#submit-add-t-form').removeAttr('disabled');
+            }
+          });
+        });
+        </script>
+      </div>
+    </div>
+  </div>
+</div>

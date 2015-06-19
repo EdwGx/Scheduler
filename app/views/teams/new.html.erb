@@ -1,0 +1,12 @@
+<div class="text-center centerY">
+  <%= form_for @team do |f| %>
+	<%= errors_for @team %>
+
+  <p>
+    Name:&nbsp;
+  	<%= f.text_field :name, placeholder: "Team name..." %>
+  </p>
+  <br/>
+  <%= f.submit 'Create Team', data: { disable_with: "Please wait..." } %>
+</div>
+<% end %>

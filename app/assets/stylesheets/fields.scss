@@ -1,0 +1,14 @@
+// Place all the styles related to the Fields controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+.c-fields.p-show{
+  table{
+    width:80%;
+    th,td{
+      text-align: center;
+    }
+    td:nth-child(4),td:nth-child(5){
+      width: 80px;
+    }
+  }
+}

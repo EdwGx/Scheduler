@@ -1,0 +1,19 @@
+<div class="text-center centerY">
+  <%= form_for @field do |f| %>
+	<%= errors_for @field %>
+
+  <p>
+    <%= f.label :name %>
+    <br/>
+  	<%= f.text_field :name, placeholder: "Field name..." %>
+  </p>
+  <p>
+    <%= f.label :location %>
+    <br/>
+  	<%= f.text_field :location %>
+  </p>
+  <br/>
+  <%= f.submit @submit, data: { disable_with: "Please wait..." }%>
+  <% end %>
+
+</div>

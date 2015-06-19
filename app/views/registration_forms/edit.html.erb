@@ -1,0 +1,26 @@
+<div class="centerY well center-block container narrow-form">
+  <%= form_tag '', class: 'form-horizontal' do |f| %>
+  <fieldset>
+  <legend><%= @add_field ? 'Add' : 'Update' %> Field</legend>
+
+  <div class="form-group">
+      <label for="name" class="col-lg-3 control-label">Name</label>
+      <div class="col-lg-9">
+          <input type="text" class="form-control" id="name" name="name" <%= raw("value=\"#{@name}\"") unless @name.nil? %>>
+      </div>
+  </div>
+  <br/>
+  <div class="form-group">
+      <label for="type" class="col-lg-3 control-label">Input Type</label>
+      <div class="col-lg-9">
+          <select multiple="" class="form-control" name="type">
+              <option <%= 'selected="selected"' if @type == 0 %>>Text</option>
+              <option <%= 'selected="selected"' if @type == 1 %>>Date</option>
+          </select>
+      </div>
+  </div>
+
+  <%= submit_tag @add_field ? 'Add' : 'Update', class: 'btn btn-primary pull-right', data: { disable_with: "Please wait..." } %>
+  </fieldset>
+  <% end %>
+</div>

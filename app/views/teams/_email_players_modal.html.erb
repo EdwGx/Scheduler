@@ -1,0 +1,43 @@
+<div class="modal fade" id="email-modal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="emailModalLabel">New Email</h4>
+      </div>
+        <div class="modal-body">
+        <%= form_tag team_email_path(params[:id]), id: 'email-form' do %>
+          <%= hidden_field_tag :players_type, nil, id: :players_type %>
+          <div class="form-group">
+            <label for="subject" class="control-label">Subject:</label>
+            <input type="text" name="subject" class="form-control" id="subject">
+          </div>
+          <div class="form-group">
+            <label for="content" class="control-label">Content:</label>
+            <textarea class="form-control" name="content" id="content"></textarea>
+          </div>
+
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="$('#email-form').submit();">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+$('#email-modal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget);
+  var type = button.data('players');
+
+  var modal = $(this);
+  if (type == 'U') {
+    modal.find('.modal-title').text('New Email to Unverified Players');
+  } else if (type == 'V') {
+    modal.find('.modal-title').text('New Email to Players');
+  }
+  modal.find('#players_type').val(type);
+
+})
+</script>

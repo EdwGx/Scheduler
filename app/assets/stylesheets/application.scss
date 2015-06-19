@@ -1,0 +1,79 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+ *= require_self
+ *= require bootstrap-material-design
+ */
+ @import "bootstrap-sprockets";
+ @import "bootstrap";
+ @import "bootstrap-datetimepicker";
+
+ @import "*";
+
+.centerX{
+  position:relative;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
+
+.p50{
+  width: 50%;
+}
+
+.centerY{
+  position:relative;
+  top: 40vh;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.delete-button{
+  color: #c0392b;
+}
+
+.green-tag, .yellow-tag, .red-tag{
+  padding:3px 6px 3px 6px;
+  border-radius:5px;
+  color:white;
+}
+
+.green-tag{
+  background-color: #2ecc71;
+}
+
+.yellow-tag{
+  background-color: #f1c40f;
+}
+
+.red-tag{
+  background-color: #e74c3c;
+}
+
+.modal-body{
+  margin-top: 20px;
+}
+
+.cell-option{
+  white-space: nowrap;
+  width: 1px;
+}
+
+.error-explanation{
+  width: 500px;
+}
+
+.narrow-form{
+  max-width: 600px;
+}

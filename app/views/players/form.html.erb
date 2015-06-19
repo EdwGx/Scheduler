@@ -1,0 +1,32 @@
+<div class="panel panel-default center-block centerY p50">
+  <div class="panel-body">
+  <% url = @player.persisted? ? team_player_path(params[:team_id],params[:id]) : team_players_path(params[:team_id]) %>
+  <%= form_for @player, url: url, html: {role: 'form'} do |f| %>
+	<%= errors_for @player %>
+
+  <div class="form-group">
+    <%= f.label :name %>
+  	<%= f.text_field :name, placeholder: 'Player name...', class: 'form-control' %>
+  </div>
+  <div class="form-group">
+    <%= f.label :email %>
+    <br/>
+  	<%= f.email_field :email, class: 'form-control' %>
+  </div>
+  <% @team.players_info.each_with_index do |info, index| %>
+  <div class="form-group">
+    <%= label_tag "player[info][#{index}]", info[0] %>
+    <br/>
+    <% default = @player.info.nil? ? nil : @player.info[index] %>
+    <% if info[1] == 0 %>
+  	<%= text_field_tag "player[info][#{index}]", default, class: 'form-control' %>
+    <% else %>
+    <%= date_select 'player[info]', index, default: (default.nil? ? nil : Date.iso8601(default)), start_year: Date.today.year - 20, end_year: Date.today.year + 10, include_blank: false %>
+    <% end %>
+  </div>
+  <% end %>
+  <br/>
+  <%= f.submit data: { disable_with: nil }, class: 'btn btn-default'%>
+  <% end %>
+  </div>
+</div>
