@@ -4,7 +4,7 @@ class RegistrationFormsController < ApplicationController
   def edit
     index = params[:info_id].nil? ? nil : (params[:info_id].to_i - 1)
     @add_field = index.nil?
-
+    @type = 0
     unless @add_field
       set_team
       if index >= 0 && index < @team.players_info.count

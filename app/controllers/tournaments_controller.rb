@@ -60,13 +60,14 @@ class TournamentsController < ApplicationController
       new_list
     end
 
+    if @admin
+      @unused_teams = current_user.teams.where.not(id: teams_set.to_a).all
 
-    @unused_teams = current_user.teams.where.not(id: teams_set.to_a).all
-
-    @fields = current_user.fields.pluck(:id, :name)
-    @fields.map! do |field|
-      field << current_fields.include?(field[0])
-      field
+      @fields = current_user.fields.pluck(:id, :name)
+      @fields.map! do |field|
+        field << current_fields.include?(field[0])
+        field
+      end
     end
   end
 

@@ -279,6 +279,7 @@ $(function(){
 </div>
 <% end %>
 </div>
-
+<% if @admin %>
 <%= render partial: 'email_modal' %>
 <%= render partial: 'add_team_modal' %>
+<% end %>
